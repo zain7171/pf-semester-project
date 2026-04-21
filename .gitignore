@@ -1,0 +1,17 @@
+# Compiled output
+*.exe
+*.o
+*.out
+*.obj
+
+# Debug files
+*.pdb
+*.ilk
+
+# VS / VSCode
+.vs/
+.vscode/
+*.user
+
+# MinGW / GCC
+*.d
