@@ -6,13 +6,13 @@ using namespace std;
 void fixTime(fstream&);
 int main ()
 {
-    fstream timeFile("appointments.txt", ios::in);
-    if (timeFile.fail())
+    fstream app_file("appointments.txt", ios::in);
+    if (app_file.fail())
     {
         cout<<"Failed to open file appointments.txt"<<endl;
         exit(1);
     }
-    fixTime(timeFile);
+    fixTime(app_file);
     return 0;
 }
 void fixTime(fstream &timeFile)
@@ -23,39 +23,56 @@ void fixTime(fstream &timeFile)
         cout<<"Failed to create file temp.txt"<<endl;
         exit(1);
     }
-    string extra;
+    string line;
     int hash = 0;
     while (true)
     {
         if (timeFile.peek() == -1)
             break;
-        while (hash!=3 && getline(timeFile,extra,'#'))
-        {
-            hash++;
-            tempFile<<extra<<'#';
-        }
-        int num;
-        timeFile>>num;
-        bool greater = false;
-        if (num > 12)
-        {
-            num = num - 12;
-            greater = true;
-        }
-        char colon;
-        int mins;
-        timeFile>>colon>>mins;
-        tempFile<<num<<colon;
-        if (mins < 10)
-            tempFile<<0<<mins;
         else
-            tempFile<<mins;
-        if (greater)
-            tempFile<<" PM"<<endl;
-        else
-            tempFile<<" AM"<<endl;
-        getline(timeFile,extra);
-        hash = 0;
+        {
+            while (hash!=3 && getline(timeFile,line,'#'))
+            {
+                hash++;
+                tempFile<<line<<'#';
+            }
+            int num;
+            char colon;
+            int mins;
+            bool less_mins = false;
+            timeFile>>num>>colon>>mins;
+            if (mins < 10)
+                less_mins = true;
+            char check = timeFile.peek();
+            if (check == ' ')
+            {
+                string end;
+                timeFile>>end;
+                if (less_mins)
+                    tempFile<<num<<colon<<0<<mins<<" "<<end;
+                else
+                    tempFile<<num<<colon<<mins<<" "<<end;
+            }
+            else
+            {
+                if (num > 12)
+                {
+                    num = num - 12;
+                    if (less_mins)
+                        tempFile<<num<<colon<<0<<mins<<" PM";
+                    else
+                        tempFile<<num<<colon<<mins<<" PM";  
+                }
+                else if (num < 12)
+                {
+                    if (less_mins)
+                        tempFile<<num<<colon<<0<<mins<<" AM";
+                    else
+                        tempFile<<num<<colon<<mins<<" AM";
+                }
+            }
+            hash = 0;
+        }
     }
     tempFile.close();
     timeFile.close();
