@@ -17,12 +17,20 @@ int main ()
         exit(1);
     }
     fixDate(app_file);
-    ifstream genderFile("patients.txt");
-    if (genderFile.fail())
+    ifstream patientFile("patients.txt");
+    if (patientFile.fail())
     {
         cout<<"Failed to open file patients.txt"<<endl;
         exit(1);
     }
-    fixGenderPatient(genderFile);
+    fixGenderPatient(patientFile);
+    patientFile.clear();
+    patientFile.open("patients.txt");
+    if (patientFile.fail())
+    {
+        cout<<"Failed to open file patients.txt"<<endl;
+        exit(1);
+    }
+    checkDuplicate(patientFile);
     return 0;
 }
