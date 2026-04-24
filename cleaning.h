@@ -197,4 +197,57 @@ void fixGenderPatient(ifstream &genderFile)
     remove("patients.txt");
     rename("temp.txt", "patients.txt");
 }
+void checkDuplicate(ifstream &patientFile)
+{
+    ofstream tempFile("temp.txt");
+    if (tempFile.fail())
+    {
+        cout<<"Failed to create file temp.txt"<<endl;
+        exit(1);
+    }
+    string line;
+    int total=0;
+    while (getline(patientFile,line))
+        total++;
+    patientFile.clear();
+    patientFile.seekg(0);
+    int *arr = new int[total];
+    int id;
+    int index = 0;
+    while (patientFile>>id)
+    {
+        getline(patientFile,line);
+        arr[index] = id;
+        index++;
+    }
+    int count = 0;
+    bool first = true;
+    patientFile.clear();
+    patientFile.seekg(0);
+    while (patientFile>>id)
+    {
+        getline(patientFile,line);
+        count = 0;
+        for (int i=0; i<total; i++)
+        {
+            if (id == arr[i])
+                count++;
+        }
+        if (count>1)
+            continue;
+        else
+        {
+            if (first)
+                first = false;
+        else
+            tempFile<<endl;
+        tempFile<<id<<line;
+        }
+    }
+    delete [] arr;
+    tempFile.close();
+    patientFile.close();
+    remove("patients.txt");
+    rename("temp.txt", "patients.txt");
+}
 #endif
