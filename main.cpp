@@ -35,6 +35,8 @@ void fillPatients(ifstream&, Patient&);
 void fillDoctors(ifstream&, Doctor&);
 void addPatient(Patient*&, int&);
 void updatePatient(Patient*, int);
+void deletePatient(Patient*&, int&);
+void viewPatient(Patient*, int);
 int main ()
 {
     fstream app_file("appointments.txt", ios::in);
@@ -164,6 +166,10 @@ int main ()
                     addPatient(patients,total_pat);
                 else if (choice2 == 2)
                     updatePatient(patients,total_pat);
+                else if (choice2 == 3)
+                    viewPatient(patients,total_pat);
+                else if (choice2 == 4)
+                    deletePatient(patients,total_pat);
             }
         }
     } while (true);
@@ -299,4 +305,65 @@ void updatePatient(Patient* patients, int count)
     tempFile.close();
     remove("patients.txt");
     rename("temp.txt", "patients.txt");
+}
+void deletePatient(Patient* &patients, int &count)
+{
+    int check_id;
+    cout<<"Enter patient ID to delete record: ";
+    cin>>check_id;
+    Patient* temp = new Patient[count-1];
+    int index = 0;
+    for (int i=0; i<count; i++)
+    {
+        if (patients[i].patientId != check_id)
+        {
+            temp[index] = patients[i];
+            index++;
+        }
+    }
+    delete [] patients;
+    patients = temp;
+    count--;
+    ofstream tempFile("temp.txt");
+    if (tempFile.fail())
+    {
+        cout<<"Failed to create file temp.txt"<<endl;
+        exit(1);
+    }
+    bool first = true;
+    char hash = '#';
+    for (int i=0; i<count; i++)
+    {
+        if (first)
+            first = false;
+        else
+            tempFile<<endl;
+        tempFile<<patients[i].patientId<<hash
+        <<patients[i].name<<hash<<patients[i].age
+        <<hash<<patients[i].gender<<hash<<patients[i].contact
+        <<hash<<patients[i].balance;
+    }
+    tempFile.close();
+    remove("patients.txt");
+    rename("temp.txt", "patients.txt");
+}
+void viewPatient(Patient *patients, int count)
+{
+    int check_id;
+    cout<<"Enter patient ID to view patient details: ";
+    cin>>check_id;
+    for (int i=0; i<count; i++)
+    {
+        if (patients[i].patientId == check_id)
+        {
+            cout<<"Patient Details: "<<endl;
+            cout<<"Patient ID: "<<patients[i].patientId<<endl;
+            cout<<"Patient Name: "<<patients[i].name<<endl;
+            cout<<"Patient Age: "<<patients[i].age<<endl;
+            cout<<"Patient Gender: "<<patients[i].gender<<endl;
+            cout<<"Patient Contact: "<<patients[i].contact<<endl;
+            cout<<"Patient Balance: "<<patients[i].balance<<endl;
+            break;
+        }
+    }
 }
