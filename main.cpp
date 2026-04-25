@@ -44,9 +44,11 @@ void addDoctor(Doctor*&, int&);
 void updateDoctor(Doctor*, int);
 void deleteDoctor(Doctor*&, int&);
 void viewDoctors(Doctor*, int);
-void scheduleAppointment(Appointment*&, int&, Patient*, int, Treatment*, int);
+void scheduleAppointment(Appointment*&, int&, Patient*, int, Treatment*&, int&);
 void cancelAppointment(Appointment*&, int&);
 void viewAppointments(Appointment* , int);
+void addTreatment(Treatment*, int);
+void viewTreatments(Treatment*, int);
 int main ()
 {
     fstream app_file("appointments.txt", ios::in);
@@ -260,7 +262,13 @@ int main ()
             {
                 int choice2;
                 cout<<"You have entered Treatments/Billing management, please select an option:"<<endl;
-                cout<<""
+                cout<<"1) View Treatments"<<endl;
+                cout<<"2) Update Payment Status"<<endl;
+                cout<<"3) Generate Bill"<<endl;
+                cout<<"Enter choice: ";
+                cin>>choice2;
+                if (choice2 == 1)
+                    viewTreatments(treatments,total_treat);
             }
         }
     } while (true);
@@ -645,7 +653,7 @@ void viewDoctors(Doctor *doctors, int count)
         cout<<"Doctor Experience: "<<doctors[i].experience<<endl;
     }
 }
-void scheduleAppointment(Appointment*& appointments, int &count, Patient* patients, int total_pat, Treatment* treatments, int total_treat)
+void scheduleAppointment(Appointment*& appointments, int &count, Patient* patients, int total_pat, Treatment*& treatments, int &total_treat)
 {
     int check_id;
     cout<<"Enter Patient ID: ";
@@ -654,6 +662,7 @@ void scheduleAppointment(Appointment*& appointments, int &count, Patient* patien
     string tr;
     cout<<"Enter Treatment: ";
     getline(cin,tr);
+    double tr_cost = 0;
     bool found = false;
     for (int i=0; i<total_pat; i++)
     {
@@ -669,6 +678,7 @@ void scheduleAppointment(Appointment*& appointments, int &count, Patient* patien
                         cout<<"Insufficient balance, appointment denied."<<endl;
                         return;
                     }
+                    tr_cost = treatments[j].cost;
                     patients[i].balance -= treatments[j].cost;
                     break;
                 }
@@ -729,6 +739,17 @@ void scheduleAppointment(Appointment*& appointments, int &count, Patient* patien
     <<appointments[count].time;
     appFile.close();
     count++;
+    Treatment* ttemp = new Treatment[total_treat+1];
+    for (int i=0; i<total_treat; i++)
+        ttemp[i] = treatments[i];
+    delete [] treatments;
+    treatments = ttemp;
+    treatments[total_treat].patientId = check_id;
+    treatments[total_treat].description = tr;
+    treatments[total_treat].cost = tr_cost;
+    treatments[total_treat].paid = true;
+    total_treat++;
+    addTreatment(treatments,total_treat);
 }
 void cancelAppointment(Appointment* &appointments, int &count)
 {
@@ -785,5 +806,43 @@ void viewAppointments(Appointment *appointments, int count)
         cout<<"Doctor ID: "<<appointments[i].doctorId<<endl;
         cout<<"Appointment Date: "<<appointments[i].date<<endl;
         cout<<"Appointment Time: "<<appointments[i].time<<endl;
+    }
+}
+void addTreatment(Treatment* treatments, int count)
+{
+    ofstream treatFile("treatments.txt", ios::app);
+    if (treatFile.fail())
+    {
+        cout<<"Failed to open file treatments.txt"<<endl;
+        exit(1);
+    }
+    char hash = '#';
+    treatFile<<endl;
+    treatFile<<treatments[count-1].patientId<<hash
+    <<treatments[count-1].description<<hash
+    <<treatments[count-1].cost<<hash
+    <<treatments[count-1].paid;
+}
+void viewTreatments(Treatment* treatments, int count)
+{
+    int check_id;
+    cout<<"Enter Patient ID to display treatments for: ";
+    cin>>check_id;
+    cout<<"Treatment Details for Patient "<<check_id<<":"<<endl;
+    int t_count = 0;
+    bool first = true;
+    for (int i=0; i<count; i++)
+    {
+        if (treatments[i].patientId == check_id)
+        {
+            if (first)
+                first = false;
+            else
+                cout<<endl;
+            t_count++;
+            cout<<"Treatment: "<<t_count<<" Description: "<<treatments[i].description<<endl;
+            cout<<"Cost: "<<treatments[i].cost<<endl;
+            cout<<"Payment Status (true for paid, false unpaid): "<<treatments[i].paid<<endl;
+        }
     }
 }
