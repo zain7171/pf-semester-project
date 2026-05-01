@@ -50,7 +50,7 @@ void viewAppointments(Appointment* , int);
 void addTreatment(Treatment*, int);
 void viewTreatments(Treatment*, int);
 void updatePayment(Treatment*, int);
-void generateBills();
+void generateBill();
 void searchPatientsBydoc_ID(Appointment*, int, Patient*, int);
 void searchDoctorBySpecialty(Doctor*, int);
 void viewTreatmentsByDoctor(Appointment*, int, Treatment*, int);
@@ -281,7 +281,6 @@ int main ()
                 cout<<endl;
                 cout<<"1) View Treatments"<<endl;
                 cout<<"2) Update Payment Status"<<endl;
-                cout<<"3) Generate Bill"<<endl;
                 cout<<endl;
                 cout<<"Enter choice: ";
                 cin>>choice2;
@@ -290,8 +289,6 @@ int main ()
                     viewTreatments(treatments,total_treat);
                 else if (choice2 == 2)
                     updatePayment(treatments,total_treat);
-                else if (choice2 == 3)
-                    generateBill();
             }
             else if (choice == 5)
             {
