@@ -50,6 +50,11 @@ void viewAppointments(Appointment* , int);
 void addTreatment(Treatment*, int);
 void viewTreatments(Treatment*, int);
 void updatePayment(Treatment*, int);
+void generateBills();
+void searchPatientsBydoc_ID(Appointment*, int, Patient*, int);
+void searchDoctorBySpecialty(Doctor*, int);
+void viewTreatmentsByDoctor(Appointment*, int, Treatment*, int);
+void sortDoctorsByExperience(Doctor*, int);
 int main ()
 {
     fstream app_file("appointments.txt", ios::in);
@@ -174,7 +179,7 @@ int main ()
     cin>>id;
     cout<<"Enter Password: ";
     cin>>pass;
-    while (id!=123 && pass!="pass123")
+    while (id!=123 || pass!="pass123")
     {
         cout<<"Incorrect credentials, please try again."<<endl;
         cout<<endl;
@@ -189,6 +194,7 @@ int main ()
     int choice;
     do
     {
+        cout<<endl<<endl;
         cout<<"=================== Main Menu ========================="<<endl;
         cout<<endl;
         cout<<"1) Patient Management"<<endl;
@@ -196,6 +202,7 @@ int main ()
         cout<<"3) Appointments"<<endl;
         cout<<"4) Treatments & Billing"<<endl;
         cout<<"5) Search/Reports"<<endl;
+        cout<<"6) Exit"<<endl;
         cout<<endl;
         cout<<"Enter your choice: ";
         cin>>choice;
@@ -208,6 +215,7 @@ int main ()
             {
                 int choice2;
                 cout<<"You have entered Patient Management, please select an option."<<endl;
+                cout<<endl;
                 cout<<"1) Add Patient"<<endl;
                 cout<<"2) Update Patient"<<endl;
                 cout<<"3) View Patient"<<endl;
@@ -215,6 +223,7 @@ int main ()
                 cout<<endl;
                 cout<<"Enter choice: ";
                 cin>>choice2;
+                cout<<endl;
                 if (choice2 == 1)
                     addPatient(patients,total_pat);
                 else if (choice2 == 2)
@@ -228,12 +237,15 @@ int main ()
             {
                 int choice2;
                 cout<<"You have entered Doctor Management, please select an option:"<<endl;
+                cout<<endl;
                 cout<<"1) Add Doctor"<<endl;
                 cout<<"2) Update Doctor"<<endl;
                 cout<<"3) Delete Doctor"<<endl;
                 cout<<"4) View all Doctors"<<endl;
+                cout<<endl;
                 cout<<"Enter choice: ";
                 cin>>choice2;
+                cout<<endl;
                 if (choice2 == 1)
                     addDoctor(doctors,total_doc);
                 else if (choice2 == 2)
@@ -247,11 +259,14 @@ int main ()
             {
                 int choice2;
                 cout<<"You have entered Appointments management, please select an option:"<<endl;
+                cout<<endl;
                 cout<<"1) Schedule Appointment"<<endl;
                 cout<<"2) Cancel Appointment"<<endl;
                 cout<<"3) View Appointments"<<endl;
+                cout<<endl;
                 cout<<"Enter choice: ";
                 cin>>choice2;
+                cout<<endl;
                 if (choice2 == 1)
                     scheduleAppointment(appointments,total_app,patients,total_pat,treatments,total_treat);
                 else if (choice2 == 2)
@@ -263,18 +278,52 @@ int main ()
             {
                 int choice2;
                 cout<<"You have entered Treatments/Billing management, please select an option:"<<endl;
+                cout<<endl;
                 cout<<"1) View Treatments"<<endl;
                 cout<<"2) Update Payment Status"<<endl;
                 cout<<"3) Generate Bill"<<endl;
+                cout<<endl;
                 cout<<"Enter choice: ";
                 cin>>choice2;
+                cout<<endl;
                 if (choice2 == 1)
                     viewTreatments(treatments,total_treat);
                 else if (choice2 == 2)
                     updatePayment(treatments,total_treat);
+                else if (choice2 == 3)
+                    generateBill();
+            }
+            else if (choice == 5)
+            {
+                int choice2;
+                cout<<"You have entered Search/Reports, please select an option:"<<endl;
+                cout<<endl;
+                cout<<"1) Search Patients by Doctor ID"<<endl;
+                cout<<"2) Search Doctor by Specialty"<<endl;
+                cout<<"3) View Treatments by Doctor"<<endl;
+                cout<<"4) Generate Bill"<<endl;
+                cout<<"5) Sort Doctors by Experience"<<endl;
+                cout<<endl;
+                cout<<"Enter choice: ";
+                cin>>choice2;
+                cout<<endl;
+                if (choice2 == 1)
+                    searchPatientsBydoc_ID(appointments,total_app,patients,total_pat);
+                else if (choice2 == 2)
+                    searchDoctorBySpecialty(doctors,total_doc);
+                else if (choice2 == 3)
+                    viewTreatmentsByDoctor(appointments,total_app,treatments,total_treat);
+                else if (choice2 == 4)
+                    generateBill();
+                else if (choice2 == 5)
+                    sortDoctorsByExperience(doctors,total_doc);
             }
         }
     } while (true);
+    delete[] patients;
+    delete[] doctors;
+    delete[] appointments;
+    delete[] treatments;
     return 0;
 }
 void count_records(ifstream &file, int &total)
@@ -970,4 +1019,113 @@ void updatePayment(Treatment *treatments, int count)
     temp.close();
     remove("bills.txt");
     rename("temp.txt", "bills.txt");
+}
+void generateBill()
+{
+    ifstream billFile("bills.txt");
+    if (billFile.fail())
+    {
+        cout<<"Failed to open bills.txt"<<endl;
+        return;
+    }
+    int id;
+    double total_cost;
+    string status;
+    char hash;
+    cout<<"--- Unpaid Bills ---"<<endl;
+    while (billFile>>id>>hash>>total_cost>>hash>>status)
+    {
+        if (status == "Unpaid")
+        {
+            cout<<"Patient ID: "<<id<<" | Total Cost: "<<total_cost<<" | Status: "<<status<<endl;
+        }
+    }
+    billFile.close();
+}
+void searchPatientsBydoc_ID(Appointment* appointments, int total_app, Patient* patients, int total_pat)
+{
+    int check_id;
+    cout<<"Enter Doctor ID to search for patients: ";
+    cin>>check_id;
+    bool found = false;
+    for (int i=0; i<total_app; i++)
+    {
+        if (appointments[i].doctorId == check_id)
+        {
+            for (int j=0; j<total_pat; j++)
+            {
+                if (patients[j].patientId == appointments[i].patientId)
+                {
+                    cout<<"Patient Name: "<<patients[j].name<<" (ID: "<<patients[j].patientId<<")"<<endl;
+                    found = true;
+                    break;
+                }
+            }
+        }
+    }
+    if (!found)
+        cout<<"No patients found for this Doctor ID."<<endl;
+}
+void searchDoctorBySpecialty(Doctor* doctors, int total_doc)
+{
+    string spec;
+    cout<<"Enter Specialty to search: ";
+    cin.ignore();
+    getline(cin, spec);
+    bool found = false;
+    for (int i = 0; i < total_doc; i++)
+    {
+        if (doctors[i].speciality == spec)
+        {
+            cout<<"Doctor ID: "<<doctors[i].doc_id<<" | Name: "<<doctors[i].name<<" | Experience: "<<doctors[i].experience<<" years"<<endl;
+            found = true;
+        }
+    }
+    if (!found)
+        cout<<"No doctors found with this specialty."<<endl;
+}
+void viewTreatmentsByDoctor(Appointment* appointments, int total_app, Treatment* treatments, int total_treat)
+{
+    int check_id;
+    cout<<"Enter Doctor ID to view treatments given: ";
+    cin>>check_id;
+    bool found = false;
+    for (int i=0; i<total_app; i++)
+    {
+        if (appointments[i].doctorId == check_id)
+        {
+            for (int j=0; j<total_treat; j++)
+            {
+                if (treatments[j].patientId == appointments[i].patientId)
+                {
+                    cout<<"Treatment for Patient "<<treatments[j].patientId<<": "<<treatments[j].description<<endl;
+                    found = true;
+                }
+            }
+        }
+    }
+    if (!found)
+        cout<<"No treatments recorded for this Doctor ID."<<endl;
+}
+void sortDoctorsByExperience(Doctor* doctors, int total_doc)
+{
+    for (int i=0; i < total_doc-1; i++)
+    {
+        int max_index = i;
+        for (int j = i + 1; j < total_doc; j++)
+        {
+            if (doctors[j].experience > doctors[max_index].experience)
+            {
+                max_index = j;
+            }
+        }
+        Doctor temp = doctors[max_index];
+        doctors[max_index] = doctors[i];
+        doctors[i] = temp;
+    }
+    cout<<"Doctors have been sorted by years of experience using selection sort."<<endl;
+    for (int i = 0; i < total_doc; i++)
+    {
+        cout<<"Name: "<<doctors[i].name<<" | Experience: "<<doctors[i].experience<<" years | ID: "<<doctors[i].doc_id<<endl;
+    }
 }
