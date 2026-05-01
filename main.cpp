@@ -945,15 +945,14 @@ void updatePayment(Treatment *treatments, int count)
     for (int i=0; i<total; i++)
     {
         bool paid = true;
+        int total_cost = 0;
         for (int j=0; j<count; j++)
         {
             if(arr[i] == treatments[j].patientId)
             {
+                total_cost += treatments[j].cost;
                 if(treatments[j].paid == false)
-                {
                     paid = false;
-                    break;
-                }
             }
         }
         if (first2)
@@ -962,9 +961,9 @@ void updatePayment(Treatment *treatments, int count)
             temp<<endl;
         records>>id>>hash>>cost>>hash>>status;
         if (paid)
-            temp<<id<<hash<<cost<<hash<<"Paid";
+            temp<<id<<hash<<total_cost<<hash<<"Paid";
         else
-            temp<<id<<hash<<cost<<hash<<"Unpaid";
+            temp<<id<<hash<<total_cost<<hash<<"Unpaid";
     }
     delete [] arr;
     records.close();
