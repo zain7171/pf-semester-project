@@ -974,7 +974,7 @@ void viewTreatments(Treatment* treatments, int count)
             t_count++;
             cout<<"Treatment: "<<t_count<<" Description: "<<treatments[i].description<<endl;
             cout<<"Cost: "<<treatments[i].cost<<endl;
-            cout<<"Payment Status (true for paid, false unpaid): "<<treatments[i].paid<<endl;
+            cout<<"Payment Status (1 for paid, 0 unpaid): "<<treatments[i].paid<<endl;
         }
     }
     if (t_count == 0)
