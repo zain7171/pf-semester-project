@@ -327,7 +327,11 @@ void count_records(ifstream &file, int &total)
 {
     string line;
     while (getline(file,line))
+    {
+        if (line.empty())
+            continue;
         total++;
+    }
 }
 void fillPatients(ifstream &inFile, Patient &p)
 {
@@ -381,7 +385,7 @@ void fillTreatments(ifstream &inFile, Treatment &t)
     int patID;
     string desc;
     double cost;
-    bool p;
+    string p;
     char hash;
     inFile>>patID>>hash;
     getline(inFile,desc,'#');
@@ -389,7 +393,10 @@ void fillTreatments(ifstream &inFile, Treatment &t)
     t.patientId = patID;
     t.description = desc;
     t.cost = cost;
-    t.paid = p;
+    if (p == "true")
+        t.paid = true;
+    else
+        t.paid = false;
 }
 void addPatient(Patient* &patients, int &count)
 {
