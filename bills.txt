@@ -39,9 +39,9 @@
 139#8000#Paid
 140#30000#Unpaid
 141#5500#Paid
-142#qwe00#Unpaid
+142#3000#Unpaid
 143#18000#Unpaid
-144#4000#Paidqwe
+144#4000#Paid
 145#6000#Paid
 146#2500#Paid
 147#35000#Unpaid
@@ -49,9 +49,9 @@
 149#3500#Paid
 150#25000#Unpaid
 151#8000#Unpaid
-152#2000#Paidasdasdw
+152#2000#Paid
 153#90000#Unpaid
-154#1000#Paidqewfqe
+154#1000#Paid
 155#15000#Unpaid
 156#5000#Unpaid
 157#20000#Unpaid
