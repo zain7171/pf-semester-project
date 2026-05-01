@@ -1035,8 +1035,11 @@ void updatePayment(Treatment *treatments, int count)
 
         tempFile<<treatments[i].patientId<<hash
         <<treatments[i].description<<hash
-        <<treatments[i].cost<<hash
-        <<treatments[i].paid;
+        <<treatments[i].cost<<hash;
+        if (treatments[i].paid == 1)
+            tempFile<<"Paid";
+        else if (treatments[i].paid == 0)
+            tempFile<<"Unpaid";
     }
     tempFile.close();
     remove("treatments.txt");
