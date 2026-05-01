@@ -3,11 +3,16 @@
 103#Brain MRI#20000#false
 104#Child Vaccination#1500#true
 105#Knee Surgery#35000#false
-106#Prenatalqweasrgy Treatment#2500#true
+106#Prenatal Checkup#4000#true
+107#Skin Allergy Treatment#2500#true
 108#Appendix Surgery#45000#false
-109#Kidney Stone Removal#30000#falyuj
+109#Kidney Stone Removal#30000#false
+110#Eye Examination#2000#true
+111#ECG Test#3500#true
+112#ENT Cleaning#2000#false
 113#CT Scan#15000#false
-asdder Dislocation Fix#25000#false
+114#Flu Vaccination#1000#true
+115#Shoulder Dislocation Fix#25000#false
 116#Ultrasound#3000#true
 117#Skin Biopsy#8000#false
 118#Emergency Surgery#60000#false
