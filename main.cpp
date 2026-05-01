@@ -49,6 +49,7 @@ void cancelAppointment(Appointment*&, int&);
 void viewAppointments(Appointment* , int);
 void addTreatment(Treatment*, int);
 void viewTreatments(Treatment*, int);
+void updatePayment(Treatment*, int);
 int main ()
 {
     fstream app_file("appointments.txt", ios::in);
@@ -269,6 +270,8 @@ int main ()
                 cin>>choice2;
                 if (choice2 == 1)
                     viewTreatments(treatments,total_treat);
+                else if (choice2 == 2)
+                    updatePayment(treatments,total_treat);
             }
         }
     } while (true);
@@ -845,4 +848,127 @@ void viewTreatments(Treatment* treatments, int count)
             cout<<"Payment Status (true for paid, false unpaid): "<<treatments[i].paid<<endl;
         }
     }
+}
+void updatePayment(Treatment *treatments, int count)
+{
+    int check_id;
+    cout<<"Enter Patient ID to update payment status: ";
+    cin>>check_id;
+    cin.ignore();
+    bool found = false;
+    bool found2 = false;
+    for (int i=0; i<count; i++)
+    {
+        if (treatments[i].patientId == check_id)
+        {
+            string d;
+            found = true;
+            cout<<"Patient ID found."<<endl;
+            cout<<"Enter treatment: ";
+            getline(cin,d);
+            if (treatments[i].description == d)
+            {
+                found2 = true;
+                cout<<"Treatment found."<<endl;
+                bool p;
+                cout<<"Enter updated payment status (0 for false, 1 for true): ";
+                cin>>p;
+                treatments[i].paid = p;
+                break;
+            }
+        }
+    }
+    if (!found)
+    {
+        cout<<"Patient ID not found"<<endl;
+        return;
+    }
+    if (!found2)
+    {
+        cout<<"Treatment not found"<<endl;
+        return;
+    }
+    ofstream tempFile("temp.txt");
+    if (tempFile.fail())
+    {
+        cout<<"Failed to create file temp.txt"<<endl;
+        exit(1);
+    }
+    bool first = true;
+    for (int i=0; i<count; i++)
+    {
+        if (first)
+            first = false;
+        else
+            tempFile<<endl;
+        char hash = '#';
+        tempFile<<treatments[i].patientId<<hash<<treatments[i].description
+        <<hash<<treatments[i].cost<<hash<<treatments[i].paid;
+    }
+    tempFile.close();
+    remove("treatments.txt");
+    rename("temp.txt","treatments.txt");
+    ifstream records("bills.txt");
+    if (records.fail())
+    {
+        cout<<"Failed to read file bills.txt"<<endl;
+        exit(1);
+    }
+    int id,cost;
+    char hash;
+    string status;
+    int total = 0;
+    while(records>>id)
+    {
+        records>>hash>>cost>>hash>>status;
+        total++;
+    }
+    records.clear();
+    records.seekg(0);
+    int* arr = new int[total];
+    int index = 0;
+    while(records>>id)
+    {
+        records>>hash>>cost>>hash>>status;
+        arr[index] = id;
+        index++;
+    }
+    records.clear();
+    records.seekg(0);
+    ofstream temp("temp.txt");
+    if (temp.fail())
+    {
+        cout<<"Failed to create file temp.txt";
+        exit(1);
+    }
+    bool first2= true;
+    for (int i=0; i<total; i++)
+    {
+        bool paid = true;
+        for (int j=0; j<count; j++)
+        {
+            if(arr[i] == treatments[j].patientId)
+            {
+                if(treatments[j].paid == false)
+                {
+                    paid = false;
+                    break;
+                }
+            }
+        }
+        if (first2)
+            first2 = false;
+        else
+            temp<<endl;
+        records>>id>>hash>>cost>>hash>>status;
+        if (paid)
+            temp<<id<<hash<<cost<<hash<<"Paid";
+        else
+            temp<<id<<hash<<cost<<hash<<"Unpaid";
+    }
+    delete [] arr;
+    records.close();
+    temp.close();
+    remove("bills.txt");
+    rename("temp.txt", "bills.txt");
 }
