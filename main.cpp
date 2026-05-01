@@ -433,6 +433,20 @@ void updatePatient(Patient* patients, int count)
     int check_id;
     cout<<"Enter ID to update: ";
     cin>>check_id;
+    bool found = false;
+    for (int i=0; i<count; i++)
+    {
+        if (patients[i].patientId == check_id)
+        {
+            found = true;
+            break;
+        }
+    }
+    if (!found)
+    {
+        cout<<"Patient ID not found."<<endl;
+        return;
+    }
     int c;
     cout<<"Select what field you want to update:"<<endl;
     cout<<"1) Patient name"<<endl;
@@ -503,6 +517,20 @@ void deletePatient(Patient* &patients, int &count)
     int check_id;
     cout<<"Enter patient ID to delete record: ";
     cin>>check_id;
+    bool found = false;
+    for (int i=0; i<count; i++)
+    {
+        if (patients[i].patientId == check_id)
+        {
+            found = true;
+            break;
+        }
+    }
+    if (!found)
+    {
+        cout<<"Patient ID not found."<<endl;
+        return;
+    }
     Patient* temp = new Patient[count-1];
     int index = 0;
     for (int i=0; i<count; i++)
@@ -541,21 +569,27 @@ void deletePatient(Patient* &patients, int &count)
 }
 void viewPatients(Patient *patients, int count)
 {
-    bool first = true;
+    int check_id;
+    cout<<"Enter Patient ID to view: ";
+    cin>>check_id;
+    bool found = false;
     for (int i=0; i<count; i++)
     {
-        if (first)
-            first = false;
-        else
-            cout<<endl;
-        cout<<"Patient "<<i+1<<" Details: "<<endl;
-        cout<<"Patient ID: "<<patients[i].patientId<<endl;
-        cout<<"Patient Name: "<<patients[i].name<<endl;
-        cout<<"Patient Age: "<<patients[i].age<<endl;
-        cout<<"Patient Gender: "<<patients[i].gender<<endl;
-        cout<<"Patient Contact: "<<patients[i].contact<<endl;
-        cout<<"Patient Balance: "<<patients[i].balance<<endl;
+        if (patients[i].patientId == check_id)
+        {
+            found = true;
+            cout<<"Patient Details: "<<endl;
+            cout<<"Patient ID: "<<patients[i].patientId<<endl;
+            cout<<"Patient Name: "<<patients[i].name<<endl;
+            cout<<"Patient Age: "<<patients[i].age<<endl;
+            cout<<"Patient Gender: "<<patients[i].gender<<endl;
+            cout<<"Patient Contact: "<<patients[i].contact<<endl;
+            cout<<"Patient Balance: "<<patients[i].balance<<endl;
+            break;
+        }
     }
+    if (!found)
+        cout<<"Patient ID not found."<<endl;
 }
 void addDoctor(Doctor* &doctors, int &count)
 {
@@ -593,6 +627,20 @@ void updateDoctor(Doctor* doctors, int count)
     int check_id;
     cout<<"Enter ID to update: ";
     cin>>check_id;
+    bool found = false;
+    for (int i=0; i<count; i++)
+    {
+        if (doctors[i].doc_id == check_id)
+        {
+            found = true;
+            break;
+        }
+    }
+    if (!found)
+    {
+        cout<<"Doctor ID not found."<<endl;
+        return;
+    }
     int c;
     cout<<"Select what field you want to update:"<<endl;
     cout<<"1) Doctor Name"<<endl;
@@ -651,6 +699,20 @@ void deleteDoctor(Doctor* &doctors, int &count)
     int check_id;
     cout<<"Enter doctor ID to delete record: ";
     cin>>check_id;
+    bool found = false;
+    for (int i=0; i<count; i++)
+    {
+        if (doctors[i].doc_id == check_id)
+        {
+            found = true;
+            break;
+        }
+    }
+    if (!found)
+    {
+        cout<<"Doctor ID not found."<<endl;
+        return;
+    }
     Doctor* temp = new Doctor[count-1];
     int index = 0;
     for (int i=0; i<count; i++)
@@ -805,6 +867,20 @@ void cancelAppointment(Appointment* &appointments, int &count)
     int check_id;
     cout<<"Enter Patient ID to cancel appointment: ";
     cin>>check_id;
+    bool found = false;
+    for (int i=0; i<count; i++)
+    {
+        if (appointments[i].patientId == check_id)
+        {
+            found = true;
+            break;
+        }
+    }
+    if (!found)
+    {
+        cout<<"Patient ID not found in appointments."<<endl;
+        return;
+    }
     Appointment* temp = new Appointment[count-1];
     int index = 0;
     for (int i=0; i<count; i++)
@@ -894,6 +970,8 @@ void viewTreatments(Treatment* treatments, int count)
             cout<<"Payment Status (true for paid, false unpaid): "<<treatments[i].paid<<endl;
         }
     }
+    if (t_count == 0)
+        cout<<"No treatments found for this Patient ID."<<endl;
 }
 void updatePayment(Treatment *treatments, int count)
 {
