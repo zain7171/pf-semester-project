@@ -339,12 +339,16 @@ void fillPatients(ifstream &inFile, Patient &p)
     string name,gender,contact;
     double balance;
     char hash;
+    string line;
+    while (inFile.peek() == '\n')
+        inFile.ignore();
     inFile>>id>>hash;
     getline(inFile,name,'#');
     inFile>>age>>hash;
     getline(inFile,gender,'#');
     getline(inFile,contact,'#');
     inFile>>balance;
+    inFile.ignore();
     p.age = age;
     p.balance = balance;
     p.contact = contact;
@@ -357,10 +361,13 @@ void fillDoctors(ifstream &inFile, Doctor &d)
     int id,experience;
     string name, speciality;
     char hash;
+    while (inFile.peek() == '\n')
+        inFile.ignore();
     inFile>>id>>hash;
     getline(inFile,name,'#');
     getline(inFile,speciality,'#');
     inFile>>experience;
+    inFile.ignore();
     d.doc_id = id;
     d.experience = experience;
     d.name = name;
@@ -372,6 +379,8 @@ void fillAppointments(ifstream &inFile, Appointment &a)
     char date[11];
     char time[10];
     char hash;
+    while (inFile.peek() == '\n')
+        inFile.ignore();
     inFile>>patID>>hash>>docID>>hash;
     inFile.getline(date,11,'#');
     inFile.getline(time,10);
@@ -400,24 +409,82 @@ void fillTreatments(ifstream &inFile, Treatment &t)
 }
 void addPatient(Patient* &patients, int &count)
 {
+    int new_id;
+    cout<<"Enter ID: ";
+    cin>>new_id;
+    for (int i = 0; i < count; i++)
+    {
+        if (patients[i].patientId == new_id)
+        {
+            cout<<"Error: Patient with ID "<<new_id<<" already exists."<<endl;
+            return;
+        }
+    }
+    int new_age;
+    cout<<"Enter age: ";
+    cin>>new_age;
+    if (new_age <= 0)
+    {
+        cout<<"Error: Age must be greater than zero."<<endl;
+        return;
+    }
+    cin.ignore();
+    string new_name;
+    cout<<"Enter name: ";
+    getline(cin,new_name);
+    if (new_name.empty())
+    {
+        cout<<"Error: Name cannot be empty."<<endl;
+        return;
+    }
+    string new_gender;
+    cout<<"Enter gender: ";
+    getline(cin,new_gender);
+    if (new_gender.empty())
+    {
+        cout<<"Error: Gender cannot be empty."<<endl;
+        return;
+    }
+    string new_contact;
+    cout<<"Enter contact: ";
+    getline(cin,new_contact);
+    if (new_contact.empty())
+    {
+        cout<<"Error: Contact cannot be empty."<<endl;
+        return;
+    }
+    if (new_contact.length() != 11)
+    {
+        cout<<"Error: Contact must be exactly 11 digits."<<endl;
+        return;
+    }
+    for (int i = 0; i < new_contact.length(); i++)
+    {
+        if (!isdigit(new_contact[i]))
+        {
+            cout<<"Error: Contact must contain digits only."<<endl;
+            return;
+        }
+    }
+    double new_balance;
+    cout<<"Enter balance: ";
+    cin>>new_balance;
+    if (new_balance < 0)
+    {
+        cout<<"Error: Balance cannot be negative."<<endl;
+        return;
+    }
     Patient* temp = new Patient[count+1];
     for (int i=0; i<count; i++)
         temp[i] = patients[i];
-    delete [] patients;
+    delete[] patients;
     patients = temp;
-    cout<<"Enter ID: ";
-    cin>>patients[count].patientId;
-    cout<<"Enter age: ";
-    cin>>patients[count].age;
-    cin.ignore();
-    cout<<"Enter name: ";
-    getline(cin,patients[count].name);
-    cout<<"Enter gender: ";
-    getline(cin,patients[count].gender);
-    cout<<"Enter contact: ";
-    getline(cin,patients[count].contact);
-    cout<<"Enter balance: ";
-    cin>>patients[count].balance;
+    patients[count].patientId = new_id;
+    patients[count].age = new_age;
+    patients[count].name = new_name;
+    patients[count].gender = new_gender;
+    patients[count].contact = new_contact;
+    patients[count].balance = new_balance;
     ofstream appFile("patients.txt", ios::app);
     if (appFile.fail())
     {
@@ -434,6 +501,7 @@ void addPatient(Patient* &patients, int &count)
     <<patients[count].balance;
     appFile.close();
     count++;
+    cout<<"Patient added successfully."<<endl;
 }
 void updatePatient(Patient* patients, int count)
 {
@@ -600,20 +668,51 @@ void viewPatients(Patient *patients, int count)
 }
 void addDoctor(Doctor* &doctors, int &count)
 {
+    int new_id;
+    cout<<"Enter ID: ";
+    cin>>new_id;
+    for (int i=0; i<count; i++)
+    {
+        if (doctors[i].doc_id == new_id)
+        {
+            cout<<"Error: Doctor with ID "<<new_id<<" already exists."<<endl;
+            return;
+        }
+    }
+    int new_exp;
+    cout<<"Enter experience: ";
+    cin>>new_exp;
+    if (new_exp < 0)
+    {
+        cout<<"Error: Experience cannot be negative."<<endl;
+        return;
+    }
+    cin.ignore();
+    string new_name;
+    cout<<"Enter name: ";
+    getline(cin,new_name);
+    if (new_name.empty())
+    {
+        cout<<"Error: Name cannot be empty."<<endl;
+        return;
+    }
+    string new_speciality;
+    cout<<"Enter speciality: ";
+    getline(cin,new_speciality);
+    if (new_speciality.empty())
+    {
+        cout<<"Error: Speciality cannot be empty."<<endl;
+        return;
+    }
     Doctor* temp = new Doctor[count+1];
     for (int i=0; i<count; i++)
         temp[i] = doctors[i];
     delete [] doctors;
     doctors = temp;
-    cout<<"Enter ID: ";
-    cin>>doctors[count].doc_id;
-    cin.ignore();
-    cout<<"Enter name: ";
-    getline(cin,doctors[count].name);
-    cout<<"Enter speciality: ";
-    getline(cin,doctors[count].speciality);
-    cout<<"Enter experience: ";
-    cin>>doctors[count].experience;
+    doctors[count].doc_id = new_id;
+    doctors[count].experience = new_exp;
+    doctors[count].name = new_name;
+    doctors[count].speciality = new_speciality;
     ofstream appFile("doctors.txt", ios::app);
     if (appFile.fail())
     {
@@ -628,6 +727,7 @@ void addDoctor(Doctor* &doctors, int &count)
     <<doctors[count].experience;
     appFile.close();
     count++;
+    cout<<"Doctor added successfully."<<endl;
 }
 void updateDoctor(Doctor* doctors, int count)
 {
@@ -675,6 +775,7 @@ void updateDoctor(Doctor* doctors, int count)
             {
                 cout<<"Enter updated experience: ";
                 cin>>doctors[i].experience;
+                cin.ignore();
             }
             break;
         }
@@ -682,7 +783,7 @@ void updateDoctor(Doctor* doctors, int count)
     ofstream tempFile("temp.txt");
     if (tempFile.fail())
     {
-        cout<<"Failed to create file temp.txt";
+        cout<<"Failed to create file temp.txt"<<endl;
         exit(1);
     }
     char hash = '#';
@@ -880,7 +981,9 @@ void cancelAppointment(Appointment* &appointments, int &count)
         if (appointments[i].patientId == check_id)
         {
             found = true;
-            break;
+            cout<<"Appointment "<<i+1<<": Doctor ID: "<<appointments[i].doctorId
+            <<" | Date: "<<appointments[i].date
+            <<" | Time: "<<appointments[i].time<<endl;
         }
     }
     if (!found)
@@ -888,15 +991,31 @@ void cancelAppointment(Appointment* &appointments, int &count)
         cout<<"Patient ID not found in appointments."<<endl;
         return;
     }
+    int doc_id;
+    cout<<"Enter Doctor ID of appointment to cancel: ";
+    cin>>doc_id;
+    bool found2 = false;
+    for (int i=0; i<count; i++)
+    {
+        if (appointments[i].patientId == check_id && appointments[i].doctorId == doc_id)
+        {
+            found2 = true;
+            break;
+        }
+    }
+    if (!found2)
+    {
+        cout<<"No appointment found for this Patient and Doctor combination."<<endl;
+        return;
+    }
     Appointment* temp = new Appointment[count-1];
     int index = 0;
     for (int i=0; i<count; i++)
     {
-        if (appointments[i].patientId != check_id)
-        {
-            temp[index] = appointments[i];
-            index++;
-        }
+        if (appointments[i].patientId == check_id && appointments[i].doctorId == doc_id)
+            continue;
+        temp[index] = appointments[i];
+        index++;
     }
     delete [] appointments;
     appointments = temp;
@@ -923,6 +1042,7 @@ void cancelAppointment(Appointment* &appointments, int &count)
     tempFile.close();
     remove("appointments.txt");
     rename("temp.txt", "appointments.txt");
+    cout<<"Appointment cancelled successfully."<<endl;
 }
 void viewAppointments(Appointment *appointments, int count)
 {
@@ -1032,18 +1152,64 @@ void updatePayment(Treatment *treatments, int count)
             first = false;
         else
             tempFile<<endl;
-
         tempFile<<treatments[i].patientId<<hash
         <<treatments[i].description<<hash
         <<treatments[i].cost<<hash;
         if (treatments[i].paid == 1)
-            tempFile<<"Paid";
-        else if (treatments[i].paid == 0)
-            tempFile<<"Unpaid";
+            tempFile<<"true";
+        else
+            tempFile<<"false";
     }
     tempFile.close();
     remove("treatments.txt");
     rename("temp.txt","treatments.txt");
+    bool allPaid = true;
+    for (int i=0; i<count; i++)
+    {
+        if (treatments[i].patientId == check_id && treatments[i].paid == false)
+        {
+            allPaid = false;
+            break;
+        }
+    }
+    ofstream b_file("temp.txt");
+    if (b_file.fail())
+    {
+        cout<<"Failed to create file temp.txt"<<endl;
+        exit(1);
+    }
+    ifstream b_read("bills.txt");
+    if (b_read.fail())
+    {
+        cout<<"Failed to open bills.txt"<<endl;
+        exit(1);
+    }
+    int b_id;
+    double b_cost;
+    string b_status;
+    char b_hash;
+    bool b_first = true;
+    while (b_read>>b_id>>b_hash>>b_cost>>b_hash>>b_status)
+    {
+        if (b_first)
+            b_first = false;
+        else
+            b_file<<endl;
+        if (b_id == check_id)
+        {
+            if (allPaid)
+                b_file<<b_id<<b_hash<<b_cost<<b_hash<<"Paid";
+            else
+                b_file<<b_id<<b_hash<<b_cost<<b_hash<<"Unpaid";
+        }
+        else
+            b_file<<b_id<<b_hash<<b_cost<<b_hash<<b_status;
+    }
+    b_read.close();
+    b_file.close();
+    remove("bills.txt");
+    rename("temp.txt","bills.txt");
+    cout<<"Payment status updated successfully."<<endl;
 }
 void generateBill()
 {
@@ -1057,13 +1223,10 @@ void generateBill()
     double total_cost;
     string status;
     char hash;
-    cout<<"--- Unpaid Bills ---"<<endl;
+    cout<<"--- All Bills ---"<<endl;
     while (billFile>>id>>hash>>total_cost>>hash>>status)
     {
-        if (status == "Unpaid")
-        {
-            cout<<"Patient ID: "<<id<<" | Total Cost: "<<total_cost<<" | Status: "<<status<<endl;
-        }
+        cout<<"Patient ID: "<<id<<" | Total Cost: "<<total_cost<<" | Status: "<<status<<endl;
     }
     billFile.close();
 }
