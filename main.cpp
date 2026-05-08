@@ -1,6 +1,8 @@
 #include"cleaning.h"
 #include<cstring>
 using namespace std;
+
+// Patient structure to store patient details
 struct Patient
 {
     int patientId;
@@ -10,6 +12,8 @@ struct Patient
     string contact;
     double balance;
 };
+
+// Doctor structure to store doctor details
 struct Doctor
 {
     int doc_id;
@@ -17,6 +21,8 @@ struct Doctor
     string speciality;
     int experience;
 };
+
+// Appointment structure to store appointment details
 struct Appointment
 {
     int patientId;
@@ -24,6 +30,8 @@ struct Appointment
     char date[11];
     char time[10];
 };
+
+// Treatment structure to store treatment and billing details
 struct Treatment
 {
     int patientId;
@@ -31,6 +39,8 @@ struct Treatment
     double cost;
     bool paid;
 };
+
+// Function declarations
 void count_records(ifstream&, int&);
 void fillPatients(ifstream&, Patient&);
 void fillDoctors(ifstream&, Doctor&);
@@ -55,8 +65,10 @@ void searchPatientsBydoc_ID(Appointment*, int, Patient*, int);
 void searchDoctorBySpecialty(Doctor*, int);
 void viewTreatmentsByDoctor(Appointment*, int, Treatment*, int);
 void sortDoctorsByExperience(Doctor*, int);
+
 int main ()
 {
+    // Open appointments file and fix any 24-hour times to 12-hour AM/PM format
     fstream app_file("appointments.txt", ios::in);
     if (app_file.fail())
     {
@@ -64,6 +76,8 @@ int main ()
         exit(1);
     }
     fixTime(app_file);
+
+    // Reopen appointments file and fix any YYYY-MM-DD dates to MM-DD-YYYY format
     app_file.clear();
     app_file.open("appointments.txt", ios::in);
     if (app_file.fail())
@@ -72,6 +86,9 @@ int main ()
         exit(1);
     }
     fixDate(app_file);
+
+    // Open patients file and fix gender shorthand (M -> Male, F -> Female)
+    // Also removes records with missing name, contact, or invalid phone numbers
     ifstream patientFile("patients.txt");
     if (patientFile.fail())
     {
@@ -79,6 +96,8 @@ int main ()
         exit(1);
     }
     fixGenderPatient(patientFile);
+
+    // Reopen patients file and remove any records with duplicate patient IDs
     patientFile.clear();
     patientFile.open("patients.txt");
     if (patientFile.fail())
@@ -87,6 +106,8 @@ int main ()
         exit(1);
     }
     checkDuplicate(patientFile);
+
+    // Count total valid patient and doctor records for dynamic memory allocation
     int total_pat = 0;
     int total_doc = 0;
     patientFile.clear();
@@ -99,7 +120,10 @@ int main ()
     count_records(patientFile,total_pat);
     patientFile.close();
     patientFile.clear();
+
+    // Dynamically allocate array for patients based on count from file
     Patient* patients = new Patient[total_pat];
+
     ifstream docFile("doctors.txt");
     if (docFile.fail())
     {
@@ -109,7 +133,11 @@ int main ()
     count_records(docFile,total_doc);
     docFile.close();
     docFile.clear();
+
+    // Dynamically allocate array for doctors based on count from file
     Doctor* doctors = new Doctor[total_doc];
+
+    // Load all patient records from file into the patients array
     ifstream inFile("patients.txt");
     if (inFile.fail())
     {
@@ -120,6 +148,8 @@ int main ()
         fillPatients(inFile,patients[i]);
     inFile.close();
     inFile.clear();
+
+    // Load all doctor records from file into the doctors array
     inFile.open("doctors.txt");
     if (inFile.fail())
     {
@@ -130,6 +160,8 @@ int main ()
         fillDoctors(inFile,doctors[i]);
     inFile.close();
     inFile.clear();
+
+    // Count and load all appointment records into dynamically allocated array
     ifstream appointmentFile("appointments.txt");
     if (appointmentFile.fail())
     {
@@ -150,6 +182,8 @@ int main ()
         fillAppointments(inFile,appointments[i]);
     inFile.close();
     inFile.clear();
+
+    // Count and load all treatment records into dynamically allocated array
     ifstream treatFile("treatments.txt");
     if (treatFile.fail())
     {
@@ -169,6 +203,8 @@ int main ()
     for (int i=0; i<total_treat; i++)
         fillTreatments(inFile,treatments[i]);
     inFile.close();
+
+    // Display system header and prompt employee login
     cout<<"============================================="<<endl;
     cout<<"        HOSPITAL MANAGEMENT SYSTEM"<<endl;
     cout<<"============================================="<<endl;
@@ -179,6 +215,8 @@ int main ()
     cin>>id;
     cout<<"Enter Password: ";
     cin>>pass;
+
+    // Keep asking for credentials until correct ID and password are entered
     while (id!=123 || pass!="pass123")
     {
         cout<<"Incorrect credentials, please try again."<<endl;
@@ -191,6 +229,8 @@ int main ()
     cout<<endl;
     cout<<"Login Successful!"<<endl;
     cout<<endl;
+
+    // Main menu loop — keeps running until employee selects Exit (6)
     int choice;
     do
     {
@@ -211,6 +251,7 @@ int main ()
         else
         {
             cout<<endl;
+            // Patient Management submenu
             if (choice == 1)
             {
                 int choice2;
@@ -233,6 +274,7 @@ int main ()
                 else if (choice2 == 4)
                     deletePatient(patients,total_pat);
             }
+            // Doctor Management submenu
             else if (choice == 2)
             {
                 int choice2;
@@ -255,6 +297,7 @@ int main ()
                 else if (choice2 == 4)
                     viewDoctors(doctors,total_doc);
             }
+            // Appointments submenu
             else if (choice == 3)
             {
                 int choice2;
@@ -274,6 +317,7 @@ int main ()
                 else if (choice2 == 3)
                     viewAppointments(appointments,total_app);
             }
+            // Treatments and Billing submenu
             else if (choice == 4)
             {
                 int choice2;
@@ -290,6 +334,7 @@ int main ()
                 else if (choice2 == 2)
                     updatePayment(treatments,total_treat);
             }
+            // Search and Reports submenu
             else if (choice == 5)
             {
                 int choice2;
@@ -317,12 +362,16 @@ int main ()
             }
         }
     } while (true);
+
+    // Free all dynamically allocated memory before program exits
     delete[] patients;
     delete[] doctors;
     delete[] appointments;
     delete[] treatments;
     return 0;
 }
+
+// Counts non-empty lines in a file to determine how many records exist
 void count_records(ifstream &file, int &total)
 {
     string line;
@@ -333,6 +382,9 @@ void count_records(ifstream &file, int &total)
         total++;
     }
 }
+
+// Reads one patient record from file into a Patient struct
+// peek() skips blank lines, ignore() clears leftover newline after reading balance
 void fillPatients(ifstream &inFile, Patient &p)
 {
     int id,age;
@@ -356,6 +408,9 @@ void fillPatients(ifstream &inFile, Patient &p)
     p.name = name;
     p.patientId = id;
 }
+
+// Reads one doctor record from file into a Doctor struct
+// peek() skips blank lines, ignore() clears leftover newline after reading experience
 void fillDoctors(ifstream &inFile, Doctor &d)
 {
     int id,experience;
@@ -373,6 +428,9 @@ void fillDoctors(ifstream &inFile, Doctor &d)
     d.name = name;
     d.speciality = speciality;
 }
+
+// Reads one appointment record from file into an Appointment struct
+// Uses getline with '#' delimiter for date and newline for time
 void fillAppointments(ifstream &inFile, Appointment &a)
 {
     int patID,docID;
@@ -389,6 +447,9 @@ void fillAppointments(ifstream &inFile, Appointment &a)
     strcpy(a.date, date);
     strcpy(a.time, time);
 }
+
+// Reads one treatment record from file into a Treatment struct
+// Converts "true"/"false" string to bool for the paid field
 void fillTreatments(ifstream &inFile, Treatment &t)
 {
     int patID;
@@ -407,11 +468,16 @@ void fillTreatments(ifstream &inFile, Treatment &t)
     else
         t.paid = false;
 }
+
+// Adds a new patient — checks for duplicate ID and validates all fields
+// Only allocates memory and writes to file after all validations pass
 void addPatient(Patient* &patients, int &count)
 {
     int new_id;
     cout<<"Enter ID: ";
     cin>>new_id;
+
+    // Reject if patient ID already exists in the system
     for (int i = 0; i < count; i++)
     {
         if (patients[i].patientId == new_id)
@@ -453,6 +519,7 @@ void addPatient(Patient* &patients, int &count)
         cout<<"Error: Contact cannot be empty."<<endl;
         return;
     }
+    // Contact must be exactly 11 digits with no letters
     if (new_contact.length() != 11)
     {
         cout<<"Error: Contact must be exactly 11 digits."<<endl;
@@ -474,6 +541,8 @@ void addPatient(Patient* &patients, int &count)
         cout<<"Error: Balance cannot be negative."<<endl;
         return;
     }
+
+    // All validations passed — now expand array and add new patient
     Patient* temp = new Patient[count+1];
     for (int i=0; i<count; i++)
         temp[i] = patients[i];
@@ -485,6 +554,8 @@ void addPatient(Patient* &patients, int &count)
     patients[count].gender = new_gender;
     patients[count].contact = new_contact;
     patients[count].balance = new_balance;
+
+    // Append new patient record to patients.txt
     ofstream appFile("patients.txt", ios::app);
     if (appFile.fail())
     {
@@ -503,6 +574,9 @@ void addPatient(Patient* &patients, int &count)
     count++;
     cout<<"Patient added successfully."<<endl;
 }
+
+// Updates a specific field of an existing patient record
+// Rewrites entire patients.txt after updating the value in memory
 void updatePatient(Patient* patients, int count)
 {
     int check_id;
@@ -531,6 +605,8 @@ void updatePatient(Patient* patients, int count)
     cout<<"5) Balance"<<endl;
     cout<<"Enter choice: ";
     cin>>c;
+
+    // Find the patient and update the chosen field in memory
     for (int i=0; i<count; i++)
     {
         if (patients[i].patientId == check_id)
@@ -564,6 +640,8 @@ void updatePatient(Patient* patients, int count)
             break;
         }
     }
+
+    // Rewrite entire patients.txt with updated data
     ofstream tempFile("temp.txt");
     if (tempFile.fail())
     {
@@ -587,6 +665,8 @@ void updatePatient(Patient* patients, int count)
     remove("patients.txt");
     rename("temp.txt", "patients.txt");
 }
+
+// Deletes a patient by ID — shrinks the array and rewrites patients.txt
 void deletePatient(Patient* &patients, int &count)
 {
     int check_id;
@@ -606,6 +686,8 @@ void deletePatient(Patient* &patients, int &count)
         cout<<"Patient ID not found."<<endl;
         return;
     }
+
+    // Copy all patients except the deleted one into a new smaller array
     Patient* temp = new Patient[count-1];
     int index = 0;
     for (int i=0; i<count; i++)
@@ -619,6 +701,8 @@ void deletePatient(Patient* &patients, int &count)
     delete [] patients;
     patients = temp;
     count--;
+
+    // Rewrite patients.txt without the deleted record
     ofstream tempFile("temp.txt");
     if (tempFile.fail())
     {
@@ -642,6 +726,8 @@ void deletePatient(Patient* &patients, int &count)
     remove("patients.txt");
     rename("temp.txt", "patients.txt");
 }
+
+// Displays details of a single patient searched by ID
 void viewPatients(Patient *patients, int count)
 {
     int check_id;
@@ -666,11 +752,16 @@ void viewPatients(Patient *patients, int count)
     if (!found)
         cout<<"Patient ID not found."<<endl;
 }
+
+// Adds a new doctor — checks for duplicate ID and validates all fields
+// Only allocates memory and writes to file after all validations pass
 void addDoctor(Doctor* &doctors, int &count)
 {
     int new_id;
     cout<<"Enter ID: ";
     cin>>new_id;
+
+    // Reject if doctor ID already exists in the system
     for (int i=0; i<count; i++)
     {
         if (doctors[i].doc_id == new_id)
@@ -704,6 +795,8 @@ void addDoctor(Doctor* &doctors, int &count)
         cout<<"Error: Speciality cannot be empty."<<endl;
         return;
     }
+
+    // All validations passed — now expand array and add new doctor
     Doctor* temp = new Doctor[count+1];
     for (int i=0; i<count; i++)
         temp[i] = doctors[i];
@@ -713,6 +806,8 @@ void addDoctor(Doctor* &doctors, int &count)
     doctors[count].experience = new_exp;
     doctors[count].name = new_name;
     doctors[count].speciality = new_speciality;
+
+    // Append new doctor record to doctors.txt
     ofstream appFile("doctors.txt", ios::app);
     if (appFile.fail())
     {
@@ -729,6 +824,9 @@ void addDoctor(Doctor* &doctors, int &count)
     count++;
     cout<<"Doctor added successfully."<<endl;
 }
+
+// Updates a specific field of an existing doctor record
+// Rewrites entire doctors.txt after updating the value in memory
 void updateDoctor(Doctor* doctors, int count)
 {
     int check_id;
@@ -755,6 +853,8 @@ void updateDoctor(Doctor* doctors, int count)
     cout<<"3) Doctor Experience"<<endl;
     cout<<"Enter choice: ";
     cin>>c;
+
+    // Find the doctor and update the chosen field in memory
     for (int i=0; i<count; i++)
     {
         if (doctors[i].doc_id == check_id)
@@ -780,6 +880,8 @@ void updateDoctor(Doctor* doctors, int count)
             break;
         }
     }
+
+    // Rewrite entire doctors.txt with updated data
     ofstream tempFile("temp.txt");
     if (tempFile.fail())
     {
@@ -802,6 +904,8 @@ void updateDoctor(Doctor* doctors, int count)
     remove("doctors.txt");
     rename("temp.txt", "doctors.txt");
 }
+
+// Deletes a doctor by ID — shrinks the array and rewrites doctors.txt
 void deleteDoctor(Doctor* &doctors, int &count)
 {
     int check_id;
@@ -821,6 +925,8 @@ void deleteDoctor(Doctor* &doctors, int &count)
         cout<<"Doctor ID not found."<<endl;
         return;
     }
+
+    // Copy all doctors except the deleted one into a new smaller array
     Doctor* temp = new Doctor[count-1];
     int index = 0;
     for (int i=0; i<count; i++)
@@ -834,6 +940,8 @@ void deleteDoctor(Doctor* &doctors, int &count)
     delete [] doctors;
     doctors = temp;
     count--;
+
+    // Rewrite doctors.txt without the deleted record
     ofstream tempFile("temp.txt");
     if (tempFile.fail())
     {
@@ -856,6 +964,8 @@ void deleteDoctor(Doctor* &doctors, int &count)
     remove("doctors.txt");
     rename("temp.txt", "doctors.txt");
 }
+
+// Displays all doctors currently loaded in memory
 void viewDoctors(Doctor *doctors, int count)
 {
     bool first = true;
@@ -872,6 +982,10 @@ void viewDoctors(Doctor *doctors, int count)
         cout<<"Doctor Experience: "<<doctors[i].experience<<endl;
     }
 }
+
+// Schedules an appointment — checks patient balance against treatment cost
+// Deducts cost from balance, updates patients.txt, appends to appointments.txt
+// Also adds a new treatment record for the patient
 void scheduleAppointment(Appointment*& appointments, int &count, Patient* patients, int total_pat, Treatment*& treatments, int &total_treat)
 {
     int check_id;
@@ -883,6 +997,8 @@ void scheduleAppointment(Appointment*& appointments, int &count, Patient* patien
     getline(cin,tr);
     double tr_cost = 0;
     bool found = false;
+
+    // Find patient and matching treatment, check if balance is sufficient
     for (int i=0; i<total_pat; i++)
     {
         if (patients[i].patientId == check_id)
@@ -910,6 +1026,8 @@ void scheduleAppointment(Appointment*& appointments, int &count, Patient* patien
         cout<<"Patient or Treatment not found."<<endl;
         return;
     }
+
+    // Update patients.txt with new deducted balance
     ofstream tempFile("temp.txt");
     if (tempFile.fail())
     {
@@ -932,6 +1050,8 @@ void scheduleAppointment(Appointment*& appointments, int &count, Patient* patien
     tempFile.close();
     remove("patients.txt");
     rename("temp.txt","patients.txt");
+
+    // Expand appointments array and collect appointment details from user
     Appointment* temp = new Appointment[count+1];
     for (int i=0; i<count; i++)
         temp[i] = appointments[i];
@@ -945,6 +1065,8 @@ void scheduleAppointment(Appointment*& appointments, int &count, Patient* patien
     cin.getline(appointments[count].date,11);
     cout<<"Enter Time: ";
     cin.getline(appointments[count].time,10);
+
+    // Append new appointment to appointments.txt
     ofstream appFile("appointments.txt", ios::app);
     if (appFile.fail())
     {
@@ -958,6 +1080,8 @@ void scheduleAppointment(Appointment*& appointments, int &count, Patient* patien
     <<appointments[count].time;
     appFile.close();
     count++;
+
+    // Expand treatments array and add new treatment record for this appointment
     Treatment* ttemp = new Treatment[total_treat+1];
     for (int i=0; i<total_treat; i++)
         ttemp[i] = treatments[i];
@@ -970,12 +1094,17 @@ void scheduleAppointment(Appointment*& appointments, int &count, Patient* patien
     total_treat++;
     addTreatment(treatments,total_treat);
 }
+
+// Cancels a specific appointment — shows all appointments for the patient
+// then asks for doctor ID to identify which exact appointment to remove
 void cancelAppointment(Appointment* &appointments, int &count)
 {
     int check_id;
     cout<<"Enter Patient ID to cancel appointment: ";
     cin>>check_id;
     bool found = false;
+
+    // Display all appointments for this patient so user can choose which to cancel
     for (int i=0; i<count; i++)
     {
         if (appointments[i].patientId == check_id)
@@ -991,6 +1120,8 @@ void cancelAppointment(Appointment* &appointments, int &count)
         cout<<"Patient ID not found in appointments."<<endl;
         return;
     }
+
+    // Use patient ID + doctor ID combination to identify exact appointment
     int doc_id;
     cout<<"Enter Doctor ID of appointment to cancel: ";
     cin>>doc_id;
@@ -1008,6 +1139,8 @@ void cancelAppointment(Appointment* &appointments, int &count)
         cout<<"No appointment found for this Patient and Doctor combination."<<endl;
         return;
     }
+
+    // Copy all appointments except the cancelled one into a new smaller array
     Appointment* temp = new Appointment[count-1];
     int index = 0;
     for (int i=0; i<count; i++)
@@ -1020,6 +1153,8 @@ void cancelAppointment(Appointment* &appointments, int &count)
     delete [] appointments;
     appointments = temp;
     count--;
+
+    // Rewrite appointments.txt without the cancelled appointment
     ofstream tempFile("temp.txt");
     if (tempFile.fail())
     {
@@ -1044,6 +1179,8 @@ void cancelAppointment(Appointment* &appointments, int &count)
     rename("temp.txt", "appointments.txt");
     cout<<"Appointment cancelled successfully."<<endl;
 }
+
+// Displays all appointments currently loaded in memory
 void viewAppointments(Appointment *appointments, int count)
 {
     bool first = true;
@@ -1060,6 +1197,8 @@ void viewAppointments(Appointment *appointments, int count)
         cout<<"Appointment Time: "<<appointments[i].time<<endl;
     }
 }
+
+// Appends the most recently added treatment (last element) to treatments.txt
 void addTreatment(Treatment* treatments, int count)
 {
     ofstream treatFile("treatments.txt", ios::app);
@@ -1075,6 +1214,8 @@ void addTreatment(Treatment* treatments, int count)
     <<treatments[count-1].cost<<hash
     <<treatments[count-1].paid;
 }
+
+// Displays all treatments for a specific patient searched by ID
 void viewTreatments(Treatment* treatments, int count)
 {
     int check_id;
@@ -1100,6 +1241,10 @@ void viewTreatments(Treatment* treatments, int count)
     if (t_count == 0)
         cout<<"No treatments found for this Patient ID."<<endl;
 }
+
+// Updates payment status of a specific treatment for a patient
+// After updating treatments.txt, checks if ALL treatments for that patient
+// are paid — only then marks the bill as Paid in bills.txt
 void updatePayment(Treatment *treatments, int count)
 {
     int check_id;
@@ -1111,6 +1256,8 @@ void updatePayment(Treatment *treatments, int count)
     string d;
     cout<<"Enter treatment: ";
     getline(cin,d);
+
+    // Find the matching treatment and update its paid status in memory
     for (int i=0; i<count; i++)
     {
         if (treatments[i].patientId == check_id)
@@ -1138,6 +1285,8 @@ void updatePayment(Treatment *treatments, int count)
         cout<<"Treatment not found"<<endl;
         return;
     }
+
+    // Rewrite treatments.txt with updated payment status
     ofstream tempFile("temp.txt");
     if (tempFile.fail())
     {
@@ -1163,6 +1312,8 @@ void updatePayment(Treatment *treatments, int count)
     tempFile.close();
     remove("treatments.txt");
     rename("temp.txt","treatments.txt");
+
+    // Check if every treatment for this patient is now paid
     bool allPaid = true;
     for (int i=0; i<count; i++)
     {
@@ -1172,6 +1323,8 @@ void updatePayment(Treatment *treatments, int count)
             break;
         }
     }
+
+    // Update bills.txt — mark Paid only if all treatments are paid, otherwise keep Unpaid
     ofstream b_file("temp.txt");
     if (b_file.fail())
     {
@@ -1211,6 +1364,8 @@ void updatePayment(Treatment *treatments, int count)
     rename("temp.txt","bills.txt");
     cout<<"Payment status updated successfully."<<endl;
 }
+
+// Reads bills.txt and displays all bills with their payment status
 void generateBill()
 {
     ifstream billFile("bills.txt");
@@ -1230,6 +1385,8 @@ void generateBill()
     }
     billFile.close();
 }
+
+// Searches appointments by doctor ID and displays matching patient names
 void searchPatientsBydoc_ID(Appointment* appointments, int total_app, Patient* patients, int total_pat)
 {
     int check_id;
@@ -1254,6 +1411,8 @@ void searchPatientsBydoc_ID(Appointment* appointments, int total_app, Patient* p
     if (!found)
         cout<<"No patients found for this Doctor ID."<<endl;
 }
+
+// Searches doctors array by specialty and displays all matching doctors
 void searchDoctorBySpecialty(Doctor* doctors, int total_doc)
 {
     string spec;
@@ -1272,6 +1431,8 @@ void searchDoctorBySpecialty(Doctor* doctors, int total_doc)
     if (!found)
         cout<<"No doctors found with this specialty."<<endl;
 }
+
+// Finds all appointments for a doctor then displays treatments for those patients
 void viewTreatmentsByDoctor(Appointment* appointments, int total_app, Treatment* treatments, int total_treat)
 {
     int check_id;
@@ -1295,6 +1456,9 @@ void viewTreatmentsByDoctor(Appointment* appointments, int total_app, Treatment*
     if (!found)
         cout<<"No treatments recorded for this Doctor ID."<<endl;
 }
+
+// Sorts doctors array by experience in descending order using selection sort
+// Displays sorted list after sorting is complete
 void sortDoctorsByExperience(Doctor* doctors, int total_doc)
 {
     for (int i=0; i < total_doc-1; i++)
